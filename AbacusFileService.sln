@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbacusFileService", "AbacusFileService\AbacusFileService.csproj", "{24F51D1A-5295-40B6-BB68-B56E3D38E696}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbacusFileService.Tests", "AbacusFileService.Tests\AbacusFileService.Tests.csproj", "{EBF55B19-5BBD-4409-9E37-898CF277B1A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{24F51D1A-5295-40B6-BB68-B56E3D38E696}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24F51D1A-5295-40B6-BB68-B56E3D38E696}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24F51D1A-5295-40B6-BB68-B56E3D38E696}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBF55B19-5BBD-4409-9E37-898CF277B1A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBF55B19-5BBD-4409-9E37-898CF277B1A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBF55B19-5BBD-4409-9E37-898CF277B1A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBF55B19-5BBD-4409-9E37-898CF277B1A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
