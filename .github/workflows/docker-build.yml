@@ -37,6 +37,9 @@ jobs:
         with:
           file: ./AbacusFileService/Dockerfile
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          build-args: |
+            AZURE_STORAGE_CONNECTION_STRING=${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+            AZURE_STORAGE_CONTAINER_NAME=${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
           tags: |
             abacusfiles.azurecr.io/abacusfileservice:latest
             abacusfiles.azurecr.io/abacusfileservice:${{ github.sha }}
