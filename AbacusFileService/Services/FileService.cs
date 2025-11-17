@@ -18,10 +18,18 @@ namespace AbacusFileService.Services
         {
             _settings = settings.Value;
             _containerClient = blobServiceClient.GetBlobContainerClient(_settings.BlobContainer);
-            _containerClient.CreateIfNotExists(PublicAccessType.None);
+            _containerClient.CreateIfNotExists();
             _blobServiceClient = blobServiceClient;
         }
 
+        /// <summary>
+        /// Uploads a blob to the container. Throws FileExistsException if blob with the same name already exists.
+        /// </summary>
+        /// <param name="blobName">The name of the file</param>
+        /// <param name="content">Stream content of the file</param>
+        /// <param name="contentType">Optional content type</param>
+        /// <param name="cancellationToken">Passed cancellation token to stop the upload</param>
+        /// <exception cref="FileExistsException">When the file with the same name is already exists throws an exception</exception>
         public async Task UploadAsync(string blobName, Stream content, string? contentType = null, CancellationToken cancellationToken = default)
         {
             var blobClient = _containerClient.GetBlobClient(blobName);
@@ -33,9 +41,14 @@ namespace AbacusFileService.Services
             {
                 HttpHeaders = contentType != null ? new BlobHttpHeaders { ContentType = contentType } : null
             };
-            await blobClient.UploadAsync(content, options, cancellationToken).ConfigureAwait(false);
+            await blobClient.UploadAsync(content, options, cancellationToken);
         }
         
+        /// <summary>
+        /// Lists all the file names in the container. The names are URL encoded.
+        /// </summary>
+        /// <param name="cancellationToken">Passed cancellation token to stop the process</param>
+        /// <returns>Returns a list of strings</returns>
         public async Task<IEnumerable<string>> ListAsync(CancellationToken cancellationToken = default)
         {
             var names = new List<string>();
@@ -48,41 +61,70 @@ namespace AbacusFileService.Services
             return names;
         }
 
+        /// <summary>
+        /// Returns a URL with SAS token to download the file. The token lifetime is configurable (by default its 15 minutes).
+        /// Throws FileNotFoundException if blob does not exist.
+        /// </summary>
+        /// <param name="blobName">The name of the file</param>
+        /// <param name="cancellationToken">Passed cancellation token to stop the process</param>
+        /// <returns>The url for the file with a SAS token to download.</returns>
+        /// <exception cref="FileNotFoundException">If the file is not exists throws an exception</exception>
         public async Task<string?> DownloadAsync(string blobName, CancellationToken cancellationToken = default)
         {
             var blobClient = _containerClient.GetBlobClient(blobName);
-            var exists = await blobClient.ExistsAsync(cancellationToken).ConfigureAwait(false);
+            var exists = await blobClient.ExistsAsync(cancellationToken);
             if(!exists.Value)
             {
                 throw new FileNotFoundException($"File with name '{blobName}' does not exist.");
             }
             
-            var blobUriBuilder = await CreateSasTokenBuilder(blobName, cancellationToken, blobClient);
+            var blobUriBuilder = await CreateSasTokenBuilderAsync(blobName, blobClient, cancellationToken);
 
             return blobUriBuilder.ToUri().ToString();
         }
 
+        /// <summary>
+        /// Deletes a blob from the container. Returns true if the file is deleted or false if it's not exists (or already deleted).
+        /// </summary>
+        /// <param name="blobName">The name of the file</param>
+        /// <param name="cancellationToken">Passed cancellation token to stop the process</param>
+        /// <returns>Returns true if the file is deleted or false if it's not exists (or already deleted).</returns>
         public async Task<bool> DeleteAsync(string blobName, CancellationToken cancellationToken = default)
         {
             var blobClient = _containerClient.GetBlobClient(blobName);
-            var response = await blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var response = await blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
             return response.Value;
         }
         
+        /// <summary>
+        /// Checks if a blob exists in the container.
+        /// </summary>
+        /// <param name="blobName">The name of the file</param>
+        /// <param name="cancellationToken">Passed cancellation token to stop the process</param>
+        /// <returns>Returns true if its exists or false if not.</returns>
         private async Task<bool> ExistsAsync(string blobName, CancellationToken cancellationToken = default)
         {
             var blobClient = _containerClient.GetBlobClient(blobName);
-            var response = await blobClient.ExistsAsync(cancellationToken).ConfigureAwait(false);
+            var response = await blobClient.ExistsAsync(cancellationToken);
             return response.Value;
         }
         
-        private async Task<BlobUriBuilder> CreateSasTokenBuilder(string blobName, CancellationToken cancellationToken, BlobClient blobClient)
+        /// <summary>
+        /// Creates a BlobUriBuilder with a SAS token for the blob.
+        /// The expiry time is set based on the configuration (default 15 minutes).
+        /// The start time is the current time (UTC).
+        /// </summary>
+        /// <param name="blobName">The name of the file</param>
+        /// <param name="blobClient">The blobClient is required to get the Uri</param>
+        /// <param name="cancellationToken">Passed cancellation token to stop the process</param>
+        /// <returns>Returns a BlobUriBuilder</returns>
+        private async Task<BlobUriBuilder> CreateSasTokenBuilderAsync(string blobName, BlobClient blobClient, CancellationToken cancellationToken = default)
         {
             var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(
                 startsOn: DateTimeOffset.UtcNow,
                 expiresOn: DateTimeOffset.UtcNow.AddMinutes(_settings.BlobTokenExpiryInMinutes),
                 cancellationToken: cancellationToken
-            ).ConfigureAwait(false);
+            );
 
             var sasBuilder = new BlobSasBuilder
             {

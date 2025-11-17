@@ -6,6 +6,6 @@ public class AzureSettings
     public string? ConnectionString { get; set; }
     
     public string? StorageAccountConnectionString { get; set; }
-    
-    public int BlobTokenExpiryInMinutes { get; set; }
+
+    public int BlobTokenExpiryInMinutes { get; set; } = 15;
 }

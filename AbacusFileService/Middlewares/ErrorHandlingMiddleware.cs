@@ -8,6 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace AbacusFileService.Middlewares;
 
+    /// <summary>
+    /// Middleware for handling errors and returning appropriate HTTP responses.
+    /// In case of an unhandled exception, it logs the error with a correlation ID and returns a JSON response with the error details.
+    /// </summary>
+    /// <param name="next">RequestDelegate</param>
+    /// <param name="logger">Default logging implementation</param>
     public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
     {
         public async Task InvokeAsync(HttpContext context)
@@ -26,6 +32,13 @@ namespace AbacusFileService.Middlewares;
             }
         }
         
+        /// <summary>
+        /// Handles the exception and writes an appropriate response.
+        /// </summary>
+        /// <param name="context">HttpContext to write to</param>
+        /// <param name="exception">The handled exception</param>
+        /// <param name="correlationId">The correlationId for logging and tracing</param>
+        /// <returns>No value returned, awaitable</returns>
         private static Task HandleExceptionAsync(HttpContext context, Exception exception, string correlationId)
         {
             var statusCode = exception switch
