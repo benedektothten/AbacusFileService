@@ -30,7 +30,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: List files
+        run: |
+          ls -la
+          ls -la AbacusFileService/
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
