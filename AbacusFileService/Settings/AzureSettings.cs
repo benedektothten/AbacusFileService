@@ -3,7 +3,6 @@
 public class AzureSettings
 {
     public string? BlobContainer { get; set; }
-    public string? ConnectionString { get; set; }
     
     public string? StorageAccountConnectionString { get; set; }
 

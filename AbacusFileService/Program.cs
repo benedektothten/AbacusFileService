@@ -2,15 +2,19 @@ using AbacusFileService.Extensions;
 using AbacusFileService.Interfaces;
 using AbacusFileService.Middlewares;
 using AbacusFileService.Services;
-using AbacusFileService.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
+
+
+builder.WebHost.ConfigureKestrel(options => options.ListenAnyIP(8080));
 
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
-builder.Services.Configure<AzureSettings>(builder.Configuration.GetSection("AzureSettings"));
+// Configure and add Azure Services
+builder.Services.ConfigureAzureServices(builder.Configuration);
 builder.Services.AddAzureServices(builder.Configuration);
 
 builder.Services.AddScoped<IFileService, FileService>();
