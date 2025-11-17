@@ -31,7 +31,12 @@ Configure Azure settings in `appsettings.json` or via environment variables:
     "BlobTokenExpiryInMinutes": 60
   }
 }
+```
 
 ## Docker support
 
 Run the application in docker with these commands:
+```
+  docker build -t abacusfileservice .
+  docker run -p 8080:8080 -p 8081:8081 abacusfileservice
+```
