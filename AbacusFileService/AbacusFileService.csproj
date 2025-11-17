@@ -19,13 +19,4 @@
       <Folder Include="Models\" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-      <Content Include="..\Dockerfile">
-        <Link>Dockerfile</Link>
-      </Content>
-    </ItemGroup>
-
 </Project>
