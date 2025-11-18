@@ -22,8 +22,8 @@ namespace AbacusFileService.Services
             _containerClient = _blobServiceClient.GetBlobContainerClient(_settings.BlobContainer);
     
             // Only create if using Managed Identity (not SAS)
-            if (!blobServiceClient.Uri.Query.Contains("sp="))
-                _containerClient.CreateIfNotExists();
+            // if (!blobServiceClient.Uri.Query.Contains("sp="))
+            //     _containerClient.CreateIfNotExists();
         }
 
         /// <summary>
