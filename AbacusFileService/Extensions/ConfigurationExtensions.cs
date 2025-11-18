@@ -61,6 +61,7 @@ public static class ConfigurationExtensions
                     throw new ApplicationException("Azure Blob Container name is not configured.");
 
                 var conn = azureSettings.StorageAccountConnectionString.Trim();
+
                 Console.WriteLine($"Azure Storage Connection String: {conn}");
                 // Connection string with account key
                 if (conn.Contains("AccountKey="))

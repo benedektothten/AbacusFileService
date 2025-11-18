@@ -18,17 +18,12 @@ namespace AbacusFileService.Services
         public FileService(BlobServiceClient blobServiceClient, IOptions<AzureSettings> settings)
         {
             _settings = settings.Value;
-            if (blobServiceClient.Uri.ToString().Contains('?'))
-            {
-                _containerClient = new BlobContainerClient(blobServiceClient.Uri);
-            }
-            else
-            {
-                _containerClient = blobServiceClient.GetBlobContainerClient(_settings.BlobContainer);
-                _containerClient.CreateIfNotExists();
-            }
-
             _blobServiceClient = blobServiceClient;
+            _containerClient = _blobServiceClient.GetBlobContainerClient(_settings.BlobContainer);
+    
+            // Only create if using Managed Identity (not SAS)
+            if (!blobServiceClient.Uri.Query.Contains("sp="))
+                _containerClient.CreateIfNotExists();
         }
 
         /// <summary>
