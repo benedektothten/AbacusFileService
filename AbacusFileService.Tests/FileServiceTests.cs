@@ -17,6 +17,7 @@ public class FileServiceTests
     private readonly AzureSettings _settings = new()
     {
         BlobContainer = "test-container",
+        StorageAccountConnectionString = "DefaultEndpointsProtocol=https;AccountName=testAccountName;AccountKey=YXBwbGVib3lzZW5keW91dGhlYmVzdHdpc2hlc2Zvcm1lcnJ5Y2hyaXN0bWFzYW5kaGFwcHluZXd5ZWFyMjAyNQ==;EndpointSuffix=core.windows.net",
         BlobTokenExpiryInMinutes = 15
     };
 

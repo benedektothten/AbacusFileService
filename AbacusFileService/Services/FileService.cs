@@ -20,10 +20,6 @@ namespace AbacusFileService.Services
             _settings = settings.Value;
             _blobServiceClient = blobServiceClient;
             _containerClient = _blobServiceClient.GetBlobContainerClient(_settings.BlobContainer);
-    
-            // Only create if using Managed Identity (not SAS)
-            // if (!blobServiceClient.Uri.Query.Contains("sp="))
-            //     _containerClient.CreateIfNotExists();
         }
 
         /// <summary>
@@ -56,7 +52,7 @@ namespace AbacusFileService.Services
         public async Task<IEnumerable<string>> ListAsync(CancellationToken cancellationToken = default)
         {
             var names = new List<string>();
-
+            
             await foreach (var blobItem in _containerClient.GetBlobsAsync(cancellationToken: cancellationToken))
             {
                 names.Add(Uri.EscapeDataString(blobItem.Name));
@@ -131,12 +127,12 @@ namespace AbacusFileService.Services
                 return blobUriBuilder;
             }
             
-            var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(
-                startsOn: DateTimeOffset.UtcNow,
-                expiresOn: DateTimeOffset.UtcNow.AddMinutes(_settings.BlobTokenExpiryInMinutes),
-                cancellationToken: cancellationToken
-            );
-
+            var accountKey = GetAccountKeyFromConnectionString(_settings.StorageAccountConnectionString);
+            if (string.IsNullOrEmpty(accountKey))
+            {
+                throw new InvalidOperationException("Account key not found in connection string.");
+            }
+            
             var sasBuilder = new BlobSasBuilder
             {
                 BlobContainerName = _containerClient.Name,
@@ -147,9 +143,22 @@ namespace AbacusFileService.Services
             };
     
             sasBuilder.SetPermissions(BlobSasPermissions.Read);
+            var credential = new StorageSharedKeyCredential(_blobServiceClient.AccountName, accountKey);
+            blobUriBuilder.Sas = sasBuilder.ToSasQueryParameters(credential);
 
-            blobUriBuilder.Sas = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName);
             return blobUriBuilder;
+        }
+        
+        /// <summary>
+        /// Extracts the AccountKey from the connection string.
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
+        private string? GetAccountKeyFromConnectionString(string connectionString)
+        {
+            var parts = connectionString.Split(';');
+            var accountKeyPart = parts.FirstOrDefault(p => p.StartsWith("AccountKey=", StringComparison.OrdinalIgnoreCase));
+            return accountKeyPart?.Substring("AccountKey=".Length);
         }
     }
 }
