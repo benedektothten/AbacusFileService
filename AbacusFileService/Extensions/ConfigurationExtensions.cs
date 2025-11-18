@@ -21,19 +21,19 @@ public static class ConfigurationExtensions
         services.Configure<AzureSettings>(configuration.GetSection("AzureSettings"));
 
         // Override from environment variables if present
-        var envConn = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
-        var envContainer = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONTAINER_NAME");
-
-        if (!string.IsNullOrWhiteSpace(envConn) || !string.IsNullOrWhiteSpace(envContainer))
-        {
-            services.PostConfigure<AzureSettings>(s =>
-            {
-                if (!string.IsNullOrWhiteSpace(envConn))
-                    s.StorageAccountConnectionString = envConn;
-                if (!string.IsNullOrWhiteSpace(envContainer))
-                    s.BlobContainer = envContainer;
-            });
-        }
+        // var envConn = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
+        // var envContainer = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONTAINER_NAME");
+        //
+        // if (!string.IsNullOrWhiteSpace(envConn) || !string.IsNullOrWhiteSpace(envContainer))
+        // {
+        //     services.PostConfigure<AzureSettings>(s =>
+        //     {
+        //         if (!string.IsNullOrWhiteSpace(envConn))
+        //             s.StorageAccountConnectionString = envConn;
+        //         if (!string.IsNullOrWhiteSpace(envContainer))
+        //             s.BlobContainer = envContainer;
+        //     });
+        // }
 
         return services;
     }
@@ -63,23 +63,23 @@ public static class ConfigurationExtensions
                 var conn = azureSettings.StorageAccountConnectionString.Trim();
 
                 Console.WriteLine($"Azure Storage Connection String: {conn}");
-                var clientId = configuration["AZURE_CLIENT_ID"];
-                var credential = new ManagedIdentityCredential(clientId);
-                Console.WriteLine($"Using User-Assigned Managed Identity: {clientId}");
+                // var clientId = configuration["AZURE_CLIENT_ID"];
+                // var credential = new ManagedIdentityCredential(clientId);
+                // Console.WriteLine($"Using User-Assigned Managed Identity: {clientId}");
                 
                 // Connection string with account key
-                if (conn.Contains("AccountKey="))
-                    return new BlobServiceClient(conn, options);
+                // if (conn.Contains("AccountKey="))
+                return new BlobServiceClient(conn, options);
 
-                // SAS token or managed identity URI
-                if (conn.StartsWith("https://") && conn.Contains('?'))
-                    return new BlobServiceClient(new Uri(conn), options); // Don't use DefaultAzureCredential for SAS
-
-                // Fallback to managed identity
-                return new BlobServiceClient(new Uri(conn), credential, options);
+                // // SAS token or managed identity URI
+                // if (conn.StartsWith("https://") && conn.Contains('?'))
+                //     return new BlobServiceClient(new Uri(conn), options); // Don't use DefaultAzureCredential for SAS
+                //
+                // // Fallback to managed identity
+                // return new BlobServiceClient(new Uri(conn), credential, options);
             });
 
-            clientBuilder.UseCredential(new DefaultAzureCredential());
+            // clientBuilder.UseCredential(new DefaultAzureCredential());
         });
 
         return services;
