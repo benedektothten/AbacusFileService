@@ -10,13 +10,12 @@ builder.Configuration.AddEnvironmentVariables();
 builder.WebHost.ConfigureKestrel(options => options.ListenAnyIP(8080));
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowSpecificOrigin", cors =>
+    {
+        cors.WithOrigins("http://localhost:5173")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
 });
 
 // Add services to the container.
@@ -38,7 +37,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
 app.MapControllers();
