@@ -21,19 +21,19 @@ public static class ConfigurationExtensions
         services.Configure<AzureSettings>(configuration.GetSection("AzureSettings"));
 
         // Override from environment variables if present
-        // var envConn = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
-        // var envContainer = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONTAINER_NAME");
-        //
-        // if (!string.IsNullOrWhiteSpace(envConn) || !string.IsNullOrWhiteSpace(envContainer))
-        // {
-        //     services.PostConfigure<AzureSettings>(s =>
-        //     {
-        //         if (!string.IsNullOrWhiteSpace(envConn))
-        //             s.StorageAccountConnectionString = envConn;
-        //         if (!string.IsNullOrWhiteSpace(envContainer))
-        //             s.BlobContainer = envContainer;
-        //     });
-        // }
+        var envConn = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
+        var envContainer = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONTAINER_NAME");
+        
+        if (!string.IsNullOrWhiteSpace(envConn) || !string.IsNullOrWhiteSpace(envContainer))
+        {
+            services.PostConfigure<AzureSettings>(s =>
+            {
+                if (!string.IsNullOrWhiteSpace(envConn))
+                    s.StorageAccountConnectionString = envConn;
+                if (!string.IsNullOrWhiteSpace(envContainer))
+                    s.BlobContainer = envContainer;
+            });
+        }
 
         return services;
     }
