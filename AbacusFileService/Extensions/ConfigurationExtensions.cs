@@ -61,10 +61,17 @@ public static class ConfigurationExtensions
                     throw new ApplicationException("Azure Blob Container name is not configured.");
 
                 var conn = azureSettings.StorageAccountConnectionString.Trim();
+                
+                // Connection string with account key
+                if (conn.Contains("AccountKey="))
+                    return new BlobServiceClient(conn, options);
 
-                return conn.Contains('=') ? 
-                    new BlobServiceClient(conn, options) : 
-                    new BlobServiceClient(new Uri(conn), new DefaultAzureCredential(), options);
+                // SAS token or managed identity URI
+                if (conn.StartsWith("https://"))
+                    return new BlobServiceClient(new Uri(conn), options); // Don't use DefaultAzureCredential for SAS
+
+                // Fallback to managed identity
+                return new BlobServiceClient(new Uri(conn), new DefaultAzureCredential(), options);
             });
 
             clientBuilder.UseCredential(new DefaultAzureCredential());

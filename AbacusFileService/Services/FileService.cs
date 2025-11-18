@@ -17,8 +17,16 @@ namespace AbacusFileService.Services
         public FileService(BlobServiceClient blobServiceClient, IOptions<AzureSettings> settings)
         {
             _settings = settings.Value;
-            _containerClient = blobServiceClient.GetBlobContainerClient(_settings.BlobContainer);
-            _containerClient.CreateIfNotExists();
+            if (blobServiceClient.Uri.ToString().Contains('?'))
+            {
+                _containerClient = new BlobContainerClient(blobServiceClient.Uri);
+            }
+            else
+            {
+                _containerClient = blobServiceClient.GetBlobContainerClient(_settings.BlobContainer);
+                _containerClient.CreateIfNotExists();
+            }
+
             _blobServiceClient = blobServiceClient;
         }
 
