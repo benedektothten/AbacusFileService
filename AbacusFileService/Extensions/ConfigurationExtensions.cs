@@ -63,6 +63,10 @@ public static class ConfigurationExtensions
                 var conn = azureSettings.StorageAccountConnectionString.Trim();
 
                 Console.WriteLine($"Azure Storage Connection String: {conn}");
+                var clientId = configuration["AZURE_CLIENT_ID"];
+                var credential = new ManagedIdentityCredential(clientId);
+                Console.WriteLine($"Using User-Assigned Managed Identity: {clientId}");
+                
                 // Connection string with account key
                 if (conn.Contains("AccountKey="))
                     return new BlobServiceClient(conn, options);
@@ -72,7 +76,7 @@ public static class ConfigurationExtensions
                     return new BlobServiceClient(new Uri(conn), options); // Don't use DefaultAzureCredential for SAS
 
                 // Fallback to managed identity
-                return new BlobServiceClient(new Uri(conn), new DefaultAzureCredential(), options);
+                return new BlobServiceClient(new Uri(conn), credential, options);
             });
 
             clientBuilder.UseCredential(new DefaultAzureCredential());
