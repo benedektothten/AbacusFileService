@@ -3,6 +3,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using AbacusFileService.Interfaces;
 using AbacusFileService.Settings;
+using Azure.Storage;
 using Azure.Storage.Sas;
 using Microsoft.Extensions.Options;
 
@@ -128,6 +129,13 @@ namespace AbacusFileService.Services
         /// <returns>Returns a BlobUriBuilder</returns>
         private async Task<BlobUriBuilder> CreateSasTokenBuilderAsync(string blobName, BlobClient blobClient, CancellationToken cancellationToken = default)
         {
+            var blobUriBuilder = new BlobUriBuilder(blobClient.Uri);
+            //If the uri is already contains a SAS token, return it as is.
+            if (blobUriBuilder.Sas != null)
+            {
+                return blobUriBuilder;
+            }
+            
             var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(
                 startsOn: DateTimeOffset.UtcNow,
                 expiresOn: DateTimeOffset.UtcNow.AddMinutes(_settings.BlobTokenExpiryInMinutes),
@@ -145,11 +153,7 @@ namespace AbacusFileService.Services
     
             sasBuilder.SetPermissions(BlobSasPermissions.Read);
 
-            var blobUriBuilder = new BlobUriBuilder(blobClient.Uri)
-            {
-                Sas = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName)
-            };
-            
+            blobUriBuilder.Sas = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName);
             return blobUriBuilder;
         }
     }
