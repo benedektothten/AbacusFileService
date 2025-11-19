@@ -35,7 +35,7 @@ namespace AbacusFileService.Services
             var blobClient = _containerClient.GetBlobClient(blobName);
             if (await ExistsAsync(blobName, cancellationToken))
             {
-                throw new FileExistsException($"Blob with name '{blobName}' already exists.");
+                throw new FileExistsException($"File with name '{blobName}' already exists.");
             }
             var options = new BlobUploadOptions
             {

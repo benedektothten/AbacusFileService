@@ -39,6 +39,7 @@ public class FileController(IFileService fileService) : Controller
     /// <param name="cancellationToken">CancellationToken</param>
     /// <returns>Returns 201 if the upload was successful</returns>
     [HttpPost("upload")]
+    [RequestSizeLimit(2L * 1024 * 1024 * 1024)] // 2 GB
     public async Task<IActionResult> Upload([FromForm] IFormFile? file, [FromForm] string? blobName, CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0) return BadRequest("File is required.");
