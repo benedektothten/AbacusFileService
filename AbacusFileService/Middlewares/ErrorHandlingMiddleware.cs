@@ -3,6 +3,7 @@ using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AbacusFileService.Exceptions;
+using AbacusFileService.Providers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -24,7 +25,7 @@ namespace AbacusFileService.Middlewares;
             }
             catch (Exception ex)
             {
-                var correlationId = Guid.NewGuid().ToString();
+                var correlationId = CorrelationIdProvider.GetOrCreate(context);
                 logger.LogError(ex, "An unhandled exception occurred. CorrelationId: {CorrelationId}, Path: {Path}", 
                     correlationId, context.Request.Path);
             
